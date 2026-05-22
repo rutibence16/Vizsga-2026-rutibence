@@ -1,0 +1,618 @@
+DHCP
+
+ip dhcp pool FENT1
+netw 192.168.100.0 255.255.255.128
+def 192.168.100.1
+dns 10.0.0.1
+
+ip dhcp pool FENT2
+netw 192.168.100.128 255.255.255.128
+def 192.168.100.129
+dns 10.0.0.1
+
+ip dhcp excl 192.168.100.65 192.168.100.127
+ip dhcp exc 192.168.100.193 192.168.100.255
+
+ip dhcp pool LENT1
+netw 192.168.100.0 255.255.255.128
+def 192.168.100.1
+dns 10.0.0.1
+
+ip dhcp pool LENT2
+netw 192.168.100.128 255.255.255.128
+def 192.168.100.129
+dns 10.0.0.1
+
+ip dhcp exc 192.168.100.1 192.168.100.64
+ip dhcp exc 192.168.100.129 192.168.100.192
+
+GYAKORLÁS
+
+! vlanok
+
+vlan 10
+name LILA
+vlan 20
+name ZOLD
+vlan 30
+name SARGA
+vlan 40
+name KEK
+vlan 666
+name NEMHASZNALT
+interf ra fa0/1-24,gig0/1-2
+swi mo acc
+sw acc v 666
+shu
+
+! ssh
+ip domain-name pataky.net
+cry key gen rsa
+1024
+username admin password admin
+line vty 0 15
+tra in ssh
+login local
+enable sec admin
+line con 0
+pass admin
+login
+banner motd Xaz o tulajdonaX
+no ip domain-lookup
+spanning-tree mode rapid-pvst 
+
+! UPC
+
+interf gig0/1.10
+enca do 10
+ip add 192.168.100.1 255.255.255.192
+interf gig0/1.20
+enca do 20
+ip add 192.168.100.65 255.255.255.192
+interf gig0/1.30
+enca do 30
+ip add 192.168.100.129 255.255.255.192
+interf gig0/1.40
+enca do 40
+ip add 192.168.100.193 255.255.255.192
+interf gig0/1
+no shu
+interf gig0/0
+ip add 10.0.0.1 255.255.255.0
+no shu
+
+! DIGI
+
+interf gig0/1.10
+enca do 10
+ip add 192.168.100.2 255.255.255.192
+interf gig0/1.20
+enca do 20
+ip add 192.168.100.66 255.255.255.192
+interf gig0/1.30
+enca do 30
+ip add 192.168.100.130 255.255.255.192
+interf gig0/1.40
+enca do 40
+ip add 192.168.100.194 255.255.255.192
+interf gig0/1
+no shu
+interf gig0/0
+ip add 10.0.0.2 255.255.255.0
+no shu
+
+! TKOM
+
+interf gig0/1.10
+enca do 10
+ip add 192.168.100.3 255.255.255.192
+interf gig0/1.20
+enca do 20
+ip add 192.168.100.67 255.255.255.192
+interf gig0/1.30
+enca do 30
+ip add 192.168.100.131 255.255.255.192
+interf gig0/1.40
+enca do 40
+ip add 192.168.100.194 255.255.255.192
+interf gig0/1
+no shu
+interf gig0/0
+ip add 10.0.0.3 255.255.255.0
+no shu
+
+ip dhcp pool ZOLD
+netw 192.168.100.0 255.255.255.192
+def 192.168.100.62
+ip dhcp pool SARGA
+netw 192.168.100.64 255.255.255.192
+def 192.168.100.126
+ip dhcp pool KEK
+netw 192.168.100.128 255.255.255.192
+def 192.168.100.190
+ip dhcp pool LILA
+netw 192.168.100.192 255.255.255.192
+def 192.168.100.254
+
+
+
+
+DHCP beálítás
+
+interf gig0/1
+ip add 192.168.100.1 255.255.255.0
+desc bal
+no shu
+ip dhcp pool LAN10
+netw 192.168.100.0 255.255.255.0
+def 192.168.100.1
+interf gig0/1
+ip add 192.168.200.1 255.255.255.0
+desc jobb
+no shu
+ip dhcp pool jobb
+netw 192.168.200.0 255.255.255.0
+def 192.168.200.1
+interf gig0/2
+ip add 192.168.30.1 255.255.255.0
+desc LAN30
+no shu
+ip dhcp pool LAN30
+netw 192.168.30.0 255.255.255.0
+def 192.168.30.1
+
+Vlan beállítás
+
+vlan 10
+name LILA
+vlan 20 
+name KEK
+vlan 30
+name SARGA
+interf ra fa0/1-9
+switch mode access
+swi acc v 10
+shu
+interf ra fa0/10-19
+switch mode access
+swi acc v 20
+shu
+interf ra fa0/20-24
+switch mode access
+swi acc v 30
+shu
+interf gig0/1-2
+swi mo acc
+swi acc vlan 100
+name NEMHASZNALT
+
+virtuális kábel
+
+interf gig0/1
+interf gig0/1.10
+encapsulation dot1Q 10 
+ip add 192.168.100.1 255.255.255.0
+interf gig0/1.20
+encapsulation dot1Q 20 
+ip add 172.10.20.1 255.255.255.0
+interf gig0/1.30
+encapsulation dot1Q 30 
+ip add 10.11.12.1 255.255.255.0
+
+VLAN trunk, dhcp
+
+vlan 100
+name ZOLD
+vlan 200 
+name LILA
+vlan 300
+name NEMHASZNALT
+
+inter ra fa0/1-24,gig0/1-2
+swi mo acc
+sw acc v 300
+shu
+inter fa0/1
+sw acc v 200
+no shu
+interf fa0/10
+sw acc v 100
+no shu
+inter gig0/1
+sw mo tr
+swi tr all v 100,200
+sw tr nativ v 300
+no shu
+h S
+ip dhcp pool ZOLD
+netw 192.168.100.0 255.255.255.0
+def 192.168.100.1
+ip dhcp pool LILA
+netw 192.168.200.0 255.255.255.0
+def 192.168.200.1
+
+interf vlan 100
+ip add 192.168.100.1 255.255.255.0
+no shu
+interf vlan 200
+ip add 192.168.200.1 255.255.255.0
+no shu
+ip routing
+
+VLAN 4
+
+vlan 666
+name NEMHASZNALT
+vlan 100
+name NYOMTATO
+vlan 200
+name PC
+vlan 300
+name LAPTOP
+vlan 400
+name MANAGED
+vlan 500
+name NATIV
+interf ra fa0/1-24,gi0/1-2
+swi mo acc
+swi acc v 666
+shu
+
+interf gig0/1
+swi mo tr
+sw tr al v 100,200,300,400
+sw tr nat v 500
+
+interf fa0/1
+swi acc v 100
+interf fa0/11
+swi acc v 200
+interf fa0/21
+swi acc v 300
+
+interf ra fa0/1,fa0/11,fa0/21,gi0/1
+no shu
+
+
+interf ra fa0/1-3
+swi po tr
+sw tr all v 100,200,300,400
+swi tr nat v 500
+no shu
+
+VTP
+
+interf fa0/1
+swi mo tr
+interf fa0/2
+swi mo tr
+
+vlan 666
+name NEMHASZNALT
+vlan 100
+name 100
+vlan 200
+name 200
+vlan 300
+name 300
+do sh vlan
+vtp domain myvlan.com
+vtp password Titok
+vtp mode client
+do sh vlan
+sh vtp status
+sh vtp password
+sh vlan
+vt mo cl
+do sh vlan
+vtp password Titok
+do sh vlan
+vtp mo cl
+vtp pass Titok
+do sh vlan
+sh vtp sat
+sh vtp pass
+vtp dom myvlan.com
+vtp mo transparent
+vtp mo server
+vlan 400
+dir flash:/
+delete flash:/vlan.dat
+reload
+
+VOICE
+
+hostname R-O-S
+
+ip dhcp pool tizes
+network 192.168.10.0 255.255.255.0
+default-router 192.168.10.1
+ip dhcp pool huszas
+network 192.168.20.0 255.255.255.0
+default-router 192.168.20.1
+ip dhcp pool voip
+network 172.16.30.0 255.255.255.0
+default-router 172.16.30.1
+option 150 ip 172.16.30.1
+
+interface FastEthernet0/0
+no ip address
+duplex auto
+speed auto
+
+interface FastEthernet0/0.10
+encapsulation dot1Q 10
+ip address 192.168.10.1 255.255.255.0
+
+interface FastEthernet0/0.20
+encapsulation dot1Q 20
+ip address 192.168.20.1 255.255.255.0
+
+interface FastEthernet0/0.30
+encapsulation dot1Q 30
+ip address 172.16.30.1 255.255.255.0
+
+
+
+telephony-service
+max-ephones 5
+max-dn 5
+ip source-address 172.16.30.1 port 2000
+auto assign 1 to 5
+
+ephone 2
+device-security-mode none
+mac-address 0060.5CBC.5BB8
+type 7960
+button 1:2
+
+ephone 3
+device-security-mode none
+mac-address 0001.C77D.6A7A 
+type 7960
+button 1:3
+
+ephone 4
+device-security-mode none
+mac-address 000A.F3A2.1D46
+type 7960
+button 1:4
+
+
+
+SWITCH
+
+hostname Switch
+
+interface FastEthernet0/1
+switchport access vlan 10
+switchport mode access 
+switchport voice vlan 30
+
+interface FastEthernet0/2
+switchport access vlan 20
+switchport mode access
+switchport voice vlan 30
+
+
+interface FastEthernet0/6
+switchport access vlan 30
+switchport mode access
+
+
+interface FastEthernet0/23
+switchport mode trunk
+
+interface FastEthernet0/24
+switchport mode trunk
+
+interface GigabitEthernet0/1
+switchport mode trunk
+
+
+
+SWITCH ALSÓ >>>>>>>>>>>>>>>>>>>>>>>
+hostname Switch
+
+interface FastEthernet0/1
+switchport access vlan 10
+switchport mode access
+switchport voice vlan 30
+
+interface FastEthernet0/2
+switchport access vlan 20
+switchport mode access
+switchport voice vlan 30
+
+
+interface FastEthernet0/24
+switchport mode trunk
+
+interface GigabitEthernet0/1
+switchport mode trunk
+
+összefoglaló
+
+vlan 10
+name SERVER
+vlan 20
+name LILA
+vlan 30
+name KEK
+vlan 40
+name ZOLD
+vlan 50
+name KUKA
+vlan 60
+name MANAGED
+
+interf ra fa0/1-24,gig0/1-2
+swi mo acc
+swi acc v 50
+shu
+interf gig0/1
+swi mo tr
+swi tr nat v 50
+swi tr all v 10,20,30,40,60
+no shu
+interf gig0/2
+swi mo tr
+swi tr nat v 50
+swi tr all v 10,20,30,40,60
+no shu
+ip domain-n pataky.hu
+cry key gen rsa
+1024
+username admin pass admin
+line vty 0 15
+tran in ssh
+login local
+ip dhcp pool LILA
+netw 192.168.20.0 255.255.255.0
+def 192.168.20.1
+dns 192.168.10.2
+ip dhcp pool KEK
+netw 192.168.30.0 255.255.255.0
+def 192.168.30.1
+dns 192.168.10.2
+ip dhcp pool ZOLD
+netw 192.168.40.0 255.255.255.0
+def 192.168.40.1
+dns 192.168.10.2
+interf vlan 10
+ip add 192.168.10.1 255.255.255.0
+interf vlan 20
+ip add 192.168.20.1 255.255.255.0
+interf vlan 30
+ip add 192.168.30.1 255.255.255.0
+interf vlan 40
+ip add 192.168.40.1 255.255.255.0
+
+ip dhcp exc 192.168.20.1 192.168.20.20
+ip dhcp exc 192.168.20.235 192.168.20.254
+ip dhcp exc 192.168.30.1 192.168.20.20
+ip dhcp exc 192.168.30.235 192.168.20.254
+ip dhcp exc 192.168.40.1 192.168.20.20
+ip dhcp exc 192.168.40.235 192.168.20.254
+ip routing
+
+ETch 1
+
+en
+conf t
+int ra fa 0/1-3
+shu
+channel-group 1 mode active
+en
+conf t
+int ra fa 0/1-3
+shu
+channel-group 1 mode passive
+end
+sh ethe summary 
+
+spanning-tree mode rapid pvst
+spanning-tree prot
+
+ETCH HSRP IPV6
+
+S_1
+
+en
+conf t
+h S_FENT
+vlan 10
+vlan 20
+interf fa 0/24
+sw mo acc
+sw acc v 10
+interf ra fa0/1-3
+shu
+channel-group 1 mode desirable
+no shu
+
+interf gig0/1
+sw mo tr
+interf po 1
+swi mo tr
+
+S_2
+
+en
+conf t
+h S_LENT
+vlan 10
+vlan 20
+interf fa 0/24
+sw mo acc
+sw acc v 20
+interf ra fa0/1-3
+shu
+channel-group 1 mode auto
+no shu
+
+interf gig0/1
+sw mo tr
+interf po 1
+swi mo tr
+
+R_FENT
+
+en
+conf t
+h R_FENT
+ipv6 unicast-routing
+interf gig0/1.10
+encap dot1Q 10
+ipv6 add 2023:11:21::1/64
+interf gig0/1.20
+encap dot1Q 20
+ipv6 add abab:7:1::1/64
+interf gig0/1
+no shu
+
+R_LENT
+
+en
+conf t
+h R_LENT
+ipv6 unicast-routing
+interf gig0/1.10
+encap dot1Q 10
+ipv6 add 2023:11:21::/64 eui-64
+interf gig0/1.20
+encap dot1Q 20
+ipv6 add abab:7:1::/64 eui-64
+interf gig0/1
+no shu
+
+R_FENT
+
+interf gig0/0
+ipv6 add abba:edda:acdc::1/64
+standby version 2
+staNDBY IPV6 auto
+no shu
+
+R_LENT
+
+interf gig0/0
+ipv6 add abba:edda:acdc::2/64
+standby version 2
+staNDBY IPV6 auto
+no shu
+
+
+
+HSRP 2 
+
+
+en
+conf t
+vlan 100
+name KEK
+vlan 200
+name SARGA
+
+
+
